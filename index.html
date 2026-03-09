@@ -5,116 +5,52 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Checkpoint Submission</title>
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
-
-    .form-container {
-        background-color: #fff;
-        padding: 30px 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        max-width: 400px;
-        width: 100%;
-    }
-
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #333;
-    }
-
-    label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #555;
-    }
-
-    select, input[type="text"], textarea, input[type="file"] {
-        width: 100%;
-        padding: 10px 12px;
-        margin-bottom: 20px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
-
-    textarea {
-        resize: vertical;
-        height: 80px;
-    }
-
-    button {
-        width: 100%;
-        padding: 12px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-
-    button:hover {
-        background-color: #0056b3;
-    }
-
-    .success-message {
-        display: none;
-        text-align: center;
-        color: green;
-        margin-top: 15px;
-        font-weight: bold;
-    }
+body { font-family: Arial, sans-serif; background-color: #f9f9f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+.form-container { background-color: #fff; padding: 30px 40px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; width: 100%; }
+h2 { text-align: center; margin-bottom: 20px; color: #333; }
+label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+select, input[type="text"], textarea, input[type="file"] { width: 100%; padding: 10px 12px; margin-bottom: 20px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; }
+textarea { resize: vertical; height: 80px; }
+button { width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; transition: background-color 0.2s ease; }
+button:hover { background-color: #0056b3; }
+.success-message { display: none; text-align: center; color: green; margin-top: 15px; font-weight: bold; }
 </style>
 </head>
 <body>
 
 <div class="form-container">
-    <h2>Checkpoint Submission</h2>
+  <h2>Checkpoint Submission</h2>
+  <form id="checkpointForm">
+    <label for="checkpoint">Checkpoint</label>
+    <select id="checkpoint" required>
+      <option value="">-- Select Checkpoint --</option>
+      <option value="Gate">Gate</option>
+      <option value="Warehouse">Warehouse</option>
+      <option value="Office">Office</option>
+      <option value="Tower">Tower</option>
+      <option value="Storage">Storage</option>
+    </select>
 
-    <form id="checkpointForm">
+    <label for="status">Security Status</label>
+    <select id="status" required>
+      <option value="">-- Select Status --</option>
+      <option value="OK">OK</option>
+      <option value="Issue">Issue</option>
+      <option value="Need Assistance">Need Assistance</option>
+    </select>
 
-        <label for="checkpoint">Checkpoint</label>
-        <select id="checkpoint" required>
-            <option value="">-- Select Checkpoint --</option>
-            <option value="Gate">Gate</option>
-            <option value="Warehouse">Warehouse</option>
-            <option value="Office">Office</option>
-            <option value="Tower">Tower</option>
-            <option value="Storage">Storage</option>
-        </select>
+    <label for="comment">Comment</label>
+    <textarea id="comment" placeholder="Enter comment here..."></textarea>
 
-        <label for="status">Security Status</label>
-        <select id="status" required>
-            <option value="">-- Select Status --</option>
-            <option value="OK">OK</option>
-            <option value="Issue">Issue</option>
-            <option value="Need Assistance">Need Assistance</option>
-        </select>
+    <label for="photo">Take Photo</label>
+    <input type="file" id="photo" accept="image/*" capture="environment">
 
-        <label for="comment">Comment</label>
-        <textarea id="comment" placeholder="Enter comment here..."></textarea>
+    <button type="submit">Submit</button>
+  </form>
 
-        <label for="photo">Take Photo</label>
-        <input type="file" id="photo" accept="image/*" capture="environment">
-
-        <button type="submit">Submit</button>
-
-    </form>
-
-    <div class="success-message" id="successMsg">
-        Form submitted successfully!
-    </div>
+  <div class="success-message" id="successMsg">
+    Form submitted successfully!
+  </div>
 </div>
 
 <script>
@@ -122,100 +58,43 @@ const form = document.getElementById('checkpointForm');
 const successMsg = document.getElementById('successMsg');
 
 form.addEventListener('submit', function(e){
-    e.preventDefault();
+  e.preventDefault();
 
-    if (navigator.geolocation) {
+  if (!navigator.geolocation) { alert("Geolocation not supported"); return; }
 
-        navigator.geolocation.getCurrentPosition(
-            function(position) {
+  navigator.geolocation.getCurrentPosition(function(position){
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
 
-                const lat = position.coords.latitude;
-                const lon = position.coords.longitude;
+    const checkpoint = document.getElementById('checkpoint').value;
+    const status = document.getElementById('status').value;
+    const comment = document.getElementById('comment').value;
+    const photoFile = document.getElementById("photo").files[0];
 
-                const checkpoint = document.getElementById('checkpoint').value;
-                const status = document.getElementById('status').value;
-                const comment = document.getElementById('comment').value;
-                const photoFile = document.getElementById("photo").files[0];
+    const formData = new FormData();
+    formData.append("checkpoint", checkpoint);
+    formData.append("status", status);
+    formData.append("comment", comment);
+    formData.append("gps", `${lat},${lon}`);
+    if(photoFile) formData.append("image", photoFile);
 
-                const url = "https://script.google.com/macros/s/AKfycbxwfvekwx1qFySyO-dxsvEBUTEmp_-NCVXlqqU5Vx2ttCZZSaom9n7R_I8qrFBtxa5f/exec";
-
-                if(photoFile){
-                    convertToBase64(photoFile).then(base64Image => {
-                        fetch(url, {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                checkpoint: checkpoint,
-                                status: status,
-                                comment: comment,
-                                gps: `${lat},${lon}`,
-                                image: base64Image
-                            })
-                        })
-                        .then(response => response.text())
-                        .then(data => {
-                            successMsg.style.display = 'block';
-                            form.reset();
-                            setTimeout(() => { successMsg.style.display = 'none'; }, 3000);
-                        })
-                        .catch(error => {
-                            alert("Error submitting the form. Please try again.");
-                            console.error(error);
-                        });
-                    });
-                } else {
-                    fetch(url, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({
-                            checkpoint: checkpoint,
-                            status: status,
-                            comment: comment,
-                            gps: `${lat},${lon}`
-                        })
-                    })
-                    .then(response => response.text())
-                    .then(data => {
-                        successMsg.style.display = 'block';
-                        form.reset();
-                        setTimeout(() => { successMsg.style.display = 'none'; }, 3000);
-                    })
-                    .catch(error => {
-                        alert("Error submitting the form. Please try again.");
-                        console.error(error);
-                    });
-                }
-
-            },
-            function(error){
-                alert("Please allow location access to submit the form.");
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 0
-            }
-        );
-
-    } else {
-        alert("Geolocation is not supported by this browser.");
-    }
-});
-
-function convertToBase64(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+    fetch("https://script.google.com/macros/s/AKfycbxlauHoMQ5yXfgdeeQW4y121yCRHTKV4bQHweVLglUmqnQndcD-5-UFSWTAMJ4cUjmR/exec", { method: "POST", body: formData })
+    .then(response => response.json())
+    .then(data => {
+      successMsg.style.display = "block";
+      form.reset();
+      setTimeout(() => { successMsg.style.display = "none"; }, 3000);
+    })
+    .catch(error => {
+      alert("Error submitting the form. Please try again.");
+      console.error(error);
     });
-}
+
+  }, function(err){
+    alert("Please allow location access.");
+  }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
+});
 </script>
 
 </body>
 </html>
-
