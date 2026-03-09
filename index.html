@@ -11,9 +11,12 @@ function getLocation() {
     var lat = position.coords.latitude;
     var lon = position.coords.longitude;
 
-    var formURL = "https://forms.gle/h4SL7pjrEbw5r2t1A" + lat + "," + lon;
+    var formURL = "https://docs.google.com/forms/d/e/1FAIpQLSeZLzbd_RD8OVcgUev3v0iv9yPC2jGkpCYIpz1OWaI6N4PuYA/viewform?usp=pp_url&entry.903038852=" + lat + "," + lon;
 
     window.location.href = formURL;
+
+  }, function(error){
+    alert("Please allow location access to open the form.");
   });
 }
 </script>
