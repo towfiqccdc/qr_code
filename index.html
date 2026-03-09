@@ -1,81 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Checkpoint Submission</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        background-color: #f9f9f9;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkpoint Submission</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-    .form-container {
-        background-color: #fff;
-        padding: 30px 40px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        max-width: 400px;
-        width: 100%;
-    }
+        .form-container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+        }
 
-    h2 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #333;
-    }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
 
-    label {
-        display: block;
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #555;
-    }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
 
-    select, input[type="text"], textarea {
-        width: 100%;
-        padding: 10px 12px;
-        margin-bottom: 20px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
+        select, input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            padding: 10px 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
 
-    textarea {
-        resize: vertical;
-        height: 80px;
-    }
+        textarea {
+            resize: vertical;
+            height: 80px;
+        }
 
-    button {
-        width: 100%;
-        padding: 12px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
 
-    button:hover {
-        background-color: #0056b3;
-    }
+        button:hover {
+            background-color: #0056b3;
+        }
 
-    .success-message {
-        display: none;
-        text-align: center;
-        color: green;
-        margin-top: 15px;
-        font-weight: bold;
-    }
-</style>
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            color: green;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
@@ -105,7 +112,11 @@
         <label for="comment">Comment</label>
         <textarea id="comment" placeholder="Enter comment here..."></textarea>
 
-        <button type="submit">Submit</button>
+        <label for="photo">Upload Photo</label>
+        <!-- 'capture' attribute opens the camera directly on mobile -->
+        <input type="file" id="photo" accept="image/*" capture="camera">
+
+        <button type="submit" id="submitBtn">Submit Report</button>
 
     </form>
 
@@ -115,77 +126,97 @@
 </div>
 
 <script>
+    const form = document.getElementById('checkpointForm');
+    const successMsg = document.getElementById('successMsg');
+    const btn = document.getElementById('submitBtn');
 
-const form = document.getElementById('checkpointForm');
-const successMsg = document.getElementById('successMsg');
+    // Helper function to convert file to Base64
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 
-form.addEventListener('submit', function(e){
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Disable button to prevent double submission
+        btn.disabled = true;
+        btn.innerText = "Uploading... Please wait";
 
-    e.preventDefault();
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(async function(position) {
+                
+                try {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
 
-    if (navigator.geolocation) {
+                    const fileInput = document.getElementById('photo');
+                    let fileData = "";
+                    let fileName = "";
 
-        navigator.geolocation.getCurrentPosition(
+                    // If a file is selected, convert it
+                    if (fileInput.files.length > 0) {
+                        const file = fileInput.files[0];
+                        fileName = file.name;
+                        fileData = await toBase64(file);
+                    }
 
-        function(position) {
+                    // Prepare the data object
+                    const payload = {
+                        checkpoint: document.getElementById('checkpoint').value,
+                        status: document.getElementById('status').value,
+                        comment: document.getElementById('comment').value,
+                        lat: lat,
+                        lon: lon,
+                        fileData: fileData,
+                        fileName: fileName
+                    };
 
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
+                    // Replace with your Web App URL after re-deploying as "POST"
+                    const url = "https://script.google.com/macros/s/AKfycbzV24EYqOq44VBrILjMhycy8huLMDCDUOdfDM6bL6gyvOB4hQ89XEssboKAFymuR2v4/exec";
 
-            const checkpoint = encodeURIComponent(document.getElementById('checkpoint').value);
-            const status = encodeURIComponent(document.getElementById('status').value);
-            const comment = encodeURIComponent(document.getElementById('comment').value);
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        mode: 'no-cors', // Essential for Apps Script cross-domain
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
-            const url =
-            "https://script.google.com/macros/s/AKfycbwj-BLCYps2H4Z3PJL4SJdascoslH7XD-SaO88EAGJ7dxsFDTeoRzGxJoRVAn2yWXSB/exec" +
-            `?checkpoint=${checkpoint}&status=${status}&comment=${comment}&lat=${lat}&lon=${lon}`;
-
-            fetch(url)
-                .then(response => response.text())
-                .then(data => {
-
+                    // Update UI
                     successMsg.style.display = 'block';
-
+                    form.reset();
+                    
                     setTimeout(() => {
                         successMsg.style.display = 'none';
-                    }, 3000);
+                    }, 5000);
 
-                })
-                .catch(error => {
-
-                    alert("Error submitting the form. Please try again.");
+                } catch (error) {
                     console.error(error);
+                    alert("Error submitting the form. Check console.");
+                } finally {
+                    btn.disabled = false;
+                    btn.innerText = "Submit Report";
+                }
 
-                });
-
-        },
-
-        function(error){
-
-            alert("Please allow location access to submit the form.");
-
-        },
-
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
+            }, function(error) {
+                alert("Please allow location access to submit the form.");
+                btn.disabled = false;
+                btn.innerText = "Submit Report";
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+            btn.disabled = false;
+            btn.innerText = "Submit Report";
         }
-
-        );
-
-    }
-
-    else {
-
-        alert("Geolocation is not supported by this browser.");
-
-    }
-
-});
-
+    });
 </script>
 
 </body>
 </html>
-
