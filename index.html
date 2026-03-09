@@ -47,54 +47,69 @@ button:hover { background-color: #0056b3; }
 
     <button type="submit">Submit</button>
   </form>
-
-  <div class="success-message" id="successMsg">
-    Form submitted successfully!
-  </div>
+  <div class="success-message" id="successMsg">Form submitted successfully!</div>
 </div>
 
 <script>
 const form = document.getElementById('checkpointForm');
 const successMsg = document.getElementById('successMsg');
 
-form.addEventListener('submit', function(e){
+// Use your actual Web App URL here
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxt9zrAeUQT7mycR8MuJiV2wr7VYELlYP8ubE55SMmWPXtJ4Cl4xrtXnm_AwE7lB44B/exec";
+
+form.addEventListener('submit', function(e) {
   e.preventDefault();
 
-  if (!navigator.geolocation) { alert("Geolocation not supported"); return; }
+  if(!navigator.geolocation){ alert("Geolocation not supported"); return; }
 
-  navigator.geolocation.getCurrentPosition(function(position){
+  navigator.geolocation.getCurrentPosition(async function(position) {
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
 
     const checkpoint = document.getElementById('checkpoint').value;
     const status = document.getElementById('status').value;
     const comment = document.getElementById('comment').value;
-    const photoFile = document.getElementById("photo").files[0];
+    const photoFile = document.getElementById('photo').files[0];
 
-    const formData = new FormData();
-    formData.append("checkpoint", checkpoint);
-    formData.append("status", status);
-    formData.append("comment", comment);
-    formData.append("gps", `${lat},${lon}`);
-    if(photoFile) formData.append("image", photoFile);
+    let imageBase64 = "";
+    if(photoFile){
+      imageBase64 = await fileToBase64(photoFile);
+    }
 
-    fetch("https://script.google.com/macros/s/AKfycbxlauHoMQ5yXfgdeeQW4y121yCRHTKV4bQHweVLglUmqnQndcD-5-UFSWTAMJ4cUjmR/exec", { method: "POST", body: formData })
-    .then(response => response.json())
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        checkpoint,
+        status,
+        comment,
+        gps: `${lat},${lon}`,
+        image: imageBase64
+      })
+    })
+    .then(res => res.json())
     .then(data => {
       successMsg.style.display = "block";
-      form.reset();
-      setTimeout(() => { successMsg.style.display = "none"; }, 3000);
+      setTimeout(()=>{ successMsg.style.display = "none"; form.reset(); }, 3000);
     })
-    .catch(error => {
-      alert("Error submitting the form. Please try again.");
-      console.error(error);
+    .catch(err => { 
+      console.error(err); 
+      alert("Error submitting form"); 
     });
 
   }, function(err){
     alert("Please allow location access.");
   }, { enableHighAccuracy:true, timeout:10000, maximumAge:0 });
 });
-</script>
 
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = err => reject(err);
+  });
+}
+</script>
 </body>
 </html>
