@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<button onclick="getLocation()">Open Checkpoint Form</button>
+
+<script>
+function getLocation() {
+  navigator.geolocation.getCurrentPosition(function(position) {
+
+    var lat = position.coords.latitude;
+    var lon = position.coords.longitude;
+
+    var formURL = "https://forms.gle/h4SL7pjrEbw5r2t1A" + lat + "," + lon;
+
+    window.location.href = formURL;
+  });
+}
+</script>
+
+</body>
+</html>
