@@ -81,7 +81,9 @@
 
 <div class="form-container">
     <h2>Checkpoint Submission</h2>
+
     <form id="checkpointForm">
+
         <label for="checkpoint">Checkpoint</label>
         <select id="checkpoint" required>
             <option value="">-- Select Checkpoint --</option>
@@ -104,54 +106,84 @@
         <textarea id="comment" placeholder="Enter comment here..."></textarea>
 
         <button type="submit">Submit</button>
+
     </form>
 
-    <div class="success-message" id="successMsg">Form submitted successfully!</div>
+    <div class="success-message" id="successMsg">
+        Form submitted successfully!
+    </div>
 </div>
 
 <script>
+
 const form = document.getElementById('checkpointForm');
 const successMsg = document.getElementById('successMsg');
 
 form.addEventListener('submit', function(e){
+
     e.preventDefault();
 
-    // Get GPS location
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
+
+        navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
 
-            // Get form values
             const checkpoint = encodeURIComponent(document.getElementById('checkpoint').value);
             const status = encodeURIComponent(document.getElementById('status').value);
             const comment = encodeURIComponent(document.getElementById('comment').value);
 
-            // Build URL for Google Apps Script
-            const url = "https://script.google.com/macros/s/AKfycbzg7KTrxkl_fRjKsyNkz7tJ5RZ6JXKLXxcYIz7rNzIoDD7bohCYx_2fpfpsPiucfL2A/exec" +
-                        `?checkpoint=${checkpoint}&status=${status}&comment=${comment}&lat=${lat}&lon=${lon}`;
+            const url =
+            "https://script.google.com/macros/s/AKfycbzg7KTrxkl_fRjKsyNkz7tJ5RZ6JXKLXxcYIz7rNzIoDD7bohCYx_2fpfpsPiucfL2A/exec" +
+            `?checkpoint=${checkpoint}&status=${status}&comment=${comment}&lat=${lat}&lon=${lon}`;
 
-            // Submit by redirect (can also use fetch for async)
             fetch(url)
                 .then(response => response.text())
                 .then(data => {
-                    successMsg.style.display = 'block';  // show message
+
+                    successMsg.style.display = 'block';
+
                     setTimeout(() => {
-                     successMsg.style.display = 'none'; // hide after 3 seconds
+                        successMsg.style.display = 'none';
                     }, 3000);
+
                 })
                 .catch(error => {
+
                     alert("Error submitting the form. Please try again.");
                     console.error(error);
+
                 });
 
-        }, function(error){
+        },
+
+        function(error){
+
             alert("Please allow location access to submit the form.");
-        });
-    } else {
-        alert("Geolocation is not supported by this browser.");
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+        }
+
+        );
+
     }
+
+    else {
+
+        alert("Geolocation is not supported by this browser.");
+
+    }
+
 });
+
 </script>
 
 </body>
