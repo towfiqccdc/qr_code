@@ -112,6 +112,9 @@
         <!-- Changed to a read-only input so it's always "Main Gate" -->
         <input type="text" id="checkpoint" value="Main Gate" readonly>
 
+        <label for="securityName">Security Officer Name</label>
+        <input type="text" id="securityName" placeholder="Enter your full name" required>
+
         <label for="status">Security Status</label>
         <select id="status" required>
             <option value="">-- Select Status --</option>
@@ -201,6 +204,7 @@
 
                 const payload = {
                     checkpoint: "Main Gate",
+                    securityName: document.getElementById('securityName').value,
                     status: document.getElementById('status').value,
                     comment: document.getElementById('comment').value,
                     lat: position.coords.latitude,
@@ -210,7 +214,7 @@
                 };
 
                 // PASTE YOUR WEB APP URL BELOW
-                const url = "https://script.google.com/macros/s/AKfycbwk3NCC5PbLmRzVd65yJSSC6GSzU4E7CwdhD4ZTZ2_-3Cbv2nh73rGUqZQGVTTXUAg/exec";
+                const url = "https://script.google.com/macros/s/AKfycbz9YMMCDnKd5E9dh24qwUS6FRPaPMiDYBeCD2L_W3U8jVVOXbT2Fq4SaWjQkM6--R4F/exec";
 
                 await fetch(url, {
                     method: 'POST',
