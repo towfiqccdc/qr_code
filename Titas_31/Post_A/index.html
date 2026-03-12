@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkpoint Submission</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            max-width: 450px;
+            width: 100%;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 14px;
+        }
+
+        select, input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        textarea {
+            resize: none;
+            height: 90px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #a5a5a5;
+            cursor: not-allowed;
+        }
+
+        #preview {
+            display: none;
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            color: #28a745;
+            margin-top: 15px;
+            font-weight: bold;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+    <h2>Checkpoint Submission</h2>
+
+    <form id="checkpointForm">
+        <label for="checkpoint">Location</label>
+        <!-- Changed to a read-only input so it's always "Main Gate" -->
+        <input type="text" id="checkpoint" value="Post A" readonly>
+
+        <label for="securityName">Security Officer Name</label>
+        <input type="text" id="securityName" placeholder="Enter your full name" required>
+
+        <label for="status">Security Status</label>
+        <select id="status" required>
+            <option value="">-- Select Status --</option>
+            <option value="OK">OK</option>
+            <option value="Issue">Issue</option>
+            <option value="Need Assistance">Need Assistance</option>
+        </select>
+
+        <label for="comment">Observation Details</label>
+        <textarea id="comment" placeholder="Describe the situation..."></textarea>
+
+        <label for="photo">Evidence Photo (Optional)</label>
+        <input type="file" id="photo" accept="image/*" capture="camera">
+        
+        <!-- Image Preview -->
+        <img id="preview" src="" alt="Preview">
+
+        <button type="submit" id="submitBtn">Submit Report</button>
+    </form>
+
+    <div class="success-message" id="successMsg">
+        ✅ Report submitted successfully!
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('checkpointForm');
+    const btn = document.getElementById('submitBtn');
+    const photoInput = document.getElementById('photo');
+    const preview = document.getElementById('preview');
+
+    // Show preview when photo is selected
+    photoInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        btn.disabled = true;
+        btn.innerText = "Compressing & Uploading...";
+
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            btn.disabled = false;
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async function(position) {
+            try {
+                let fileData = "";
+                let fileName = "";
+
+                if (photoInput.files.length > 0) {
+                    const file = photoInput.files[0];
+                    fileName = file.name;
+                    
+                    // --- COMPRESSION LOGIC (Crucial for Apps Script) ---
+                    fileData = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const MAX_WIDTH = 800; 
+                                const scaleSize = MAX_WIDTH / img.width;
+                                canvas.width = MAX_WIDTH;
+                                canvas.height = img.height * scaleSize;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                // Returns 70% quality JPEG
+                                resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+                            };
+                            img.src = event.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                const payload = {
+                    checkpoint: "Post A",
+                    securityName: document.getElementById('securityName').value,
+                    status: document.getElementById('status').value,
+                    comment: document.getElementById('comment').value,
+                    lat: position.coords.latitude,
+                    lon: position.coords.longitude,
+                    fileData: fileData,
+                    fileName: fileName
+                };
+
+                // PASTE YOUR WEB APP URL BELOW
+                const url = "https://script.google.com/macros/s/AKfycbyLpDg6zNiofH2zok6b4wnaQ3DHISOgwJk371IMqJpQ-YdorpQ_Jud3pDeduyKTjACP/exec";
+
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors', // Keeps it simple for cross-domain
+                    body: JSON.stringify(payload)
+                });
+
+                document.getElementById('successMsg').style.display = 'block';
+                form.reset();
+                preview.style.display = 'none';
+                
+                setTimeout(() => {
+                    document.getElementById('successMsg').style.display = 'none';
+                }, 5000);
+
+            } catch (err) {
+                alert("Error: " + err);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit Report";
+            }
+        }, (error) => {
+            alert("Location access is required to submit.");
+            btn.disabled = false;
+            btn.innerText = "Submit Report";
+        }, { enableHighAccuracy: true });
+    });
+</script>
+
+</body>
+</html>
+
+
