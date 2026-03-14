@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Checkpoint Submission</title>
+    <title>CCDC Checkpoint Submission</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -25,11 +25,48 @@
             width: 100%;
         }
 
+        /* Branding Section */
+        .header-section {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ee3124; /* CCDC Red Accent */
+            padding-bottom: 15px;
+        }
+
+        .logo-placeholder {
+            width: 80px;
+            height: 80px;
+            background-color: #eee;
+            border: 2px dashed #ccc;
+            margin: 0 auto 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #888;
+            border-radius: 8px;
+        }
+
+        .project-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        .well-info {
+            font-size: 14px;
+            color: #ee3124;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
         h2 {
             text-align: center;
-            margin-bottom: 25px;
-            color: #1a1a1a;
-            font-weight: 600;
+            margin: 15px 0 25px;
+            color: #333;
+            font-size: 20px;
         }
 
         label {
@@ -48,23 +85,17 @@
             border: 1px solid #ddd;
             font-size: 15px;
             box-sizing: border-box;
-            transition: border-color 0.3s;
-        }
-
-        select:focus, textarea:focus {
-            border-color: #007bff;
-            outline: none;
         }
 
         textarea {
             resize: none;
-            height: 90px;
+            height: 80px;
         }
 
         button {
             width: 100%;
             padding: 14px;
-            background-color: #007bff;
+            background-color: #ee3124; /* CCDC Red */
             color: white;
             border: none;
             border-radius: 8px;
@@ -75,12 +106,7 @@
         }
 
         button:hover {
-            background-color: #0056b3;
-        }
-
-        button:disabled {
-            background-color: #a5a5a5;
-            cursor: not-allowed;
+            background-color: #c4271d;
         }
 
         #preview {
@@ -105,38 +131,44 @@
 <body>
 
 <div class="form-container">
-    <h2>Checkpoint Submission</h2>
+    <div class="header-section">
+        <div class="logo-placeholder"  style="border: none;">
+            <img src="cnpc logo.png" alt="CCDC Logo" style="max-height: 80px; width: auto;">
+        </div>
+        <div class="project-title">CCDC Bangladesh Project</div>
+        <div class="well-info">Well No: Titas-31</div>
+    </div>
+
+    <h2>Security Monitoring Report</h2>
 
     <form id="checkpointForm">
-        <label for="checkpoint">Location</label>
-        <!-- Changed to a read-only input so it's always "Main Gate" -->
+        <label for="checkpoint">Checkpoint Location</label>
         <input type="text" id="checkpoint" value="Main Gate" readonly>
 
         <label for="securityName">Security Officer Name</label>
-        <input type="text" id="securityName" placeholder="Enter your full name" required>
+        <input type="text" id="securityName" placeholder="Enter full name" required>
 
-        <label for="status">Security Status</label>
+        <label for="status">Current Status</label>
         <select id="status" required>
-            <option value="">-- Select Status --</option>
+            <option value="">-- Select --</option>
             <option value="OK">OK</option>
-            <option value="Issue">Issue</option>
-            <option value="Need Assistance">Need Assistance</option>
+            <option value="Issue">Issue Reported</option>
+            <option value="Assistance Required">Assistance Required</option>
         </select>
 
         <label for="comment">Observation Details</label>
-        <textarea id="comment" placeholder="Describe the situation..."></textarea>
+        <textarea id="comment" placeholder="Any specific notes..."></textarea>
 
-        <label for="photo">Evidence Photo (Optional)</label>
+        <label for="photo">Take Evidence Photo</label>
         <input type="file" id="photo" accept="image/*" capture="camera">
         
-        <!-- Image Preview -->
         <img id="preview" src="" alt="Preview">
 
         <button type="submit" id="submitBtn">Submit Report</button>
     </form>
 
     <div class="success-message" id="successMsg">
-        ✅ Report submitted successfully!
+        ✅ Report submitted to Titas-31 Database!
     </div>
 </div>
 
@@ -214,7 +246,7 @@
                 };
 
                 // PASTE YOUR WEB APP URL BELOW
-                const url = "https://script.google.com/macros/s/AKfycbz9YMMCDnKd5E9dh24qwUS6FRPaPMiDYBeCD2L_W3U8jVVOXbT2Fq4SaWjQkM6--R4F/exec";
+                const url = "https://script.google.com/macros/s/AKfycbzK5w6JSfRhCSchfrrsnb8-uEeuQ_gHcZHgt_RsWsoPobdlaGlVQhdXMSnVt3-15fc/exec";
 
                 await fetch(url, {
                     method: 'POST',
@@ -246,5 +278,4 @@
 
 </body>
 </html>
-
 
